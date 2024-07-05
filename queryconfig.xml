@@ -1,0 +1,73 @@
+<root>
+	<resource>
+		<result file="PROJECT_FOLDER/ASE_Project2024_SuperPanel_composite.h3d" tag="f2"/>
+	</resource>
+	<settings csvseparator="," omega*t="0" numericprecision="12" idpoolout="NO" poissonsratio="0.500000" numericformat="Fixed" printheader="Yes"/>
+	<query id="1" type="Report">
+		<hierarchy tag="f2">
+			<loadcase id="1" stepindex="0"/>
+			<loadcase id="2" stepindex="0"/>
+			<loadcase id="3" stepindex="0"/>
+		</hierarchy>
+		<result type="Composite Stresses:Normal X Stress" components="" system="" layers="Ply  1,Ply  2,Ply  3,Ply  4,Ply  5,Ply  6,Ply  7,Ply  8," corner="" averaging="none"/>
+		<entity type="Elements" selectionmode="All" selectionlist=""/>
+		<sort by="By ID Increasing" type="By Load Case"/>
+		<output file="PROJECT_FOLDER/ply_stress_xx.csv" complexfilter="" format="Textfile"/>
+	</query>
+	<query id="2" type="Report">
+		<hierarchy tag="f2">
+			<loadcase id="1" stepindex="0"/>
+			<loadcase id="2" stepindex="0"/>
+			<loadcase id="3" stepindex="0"/>
+		</hierarchy>
+		<result type="Composite Stresses:Normal Y Stress" components="" system="" layers="Ply  1,Ply  2,Ply  3,Ply  4,Ply  5,Ply  6,Ply  7,Ply  8," corner="" averaging="none"/>
+		<entity type="Elements" selectionmode="All" selectionlist=""/>
+		<sort by="By ID Increasing" type="By Load Case"/>
+		<output file="PROJECT_FOLDER/ply_stress_yy.csv" complexfilter="" format="Textfile"/>
+	</query>
+	<query id="3" type="Report">
+		<hierarchy tag="f2">
+			<loadcase id="1" stepindex="0"/>
+			<loadcase id="2" stepindex="0"/>
+			<loadcase id="3" stepindex="0"/>
+		</hierarchy>
+		<result type="Composite Stresses:Shear XY Stress" components="" system="" layers="Ply  1,Ply  2,Ply  3,Ply  4,Ply  5,Ply  6,Ply  7,Ply  8," corner="" averaging="none"/>
+		<entity type="Elements" selectionmode="All" selectionlist=""/>
+		<sort by="By ID Increasing" type="By Load Case"/>
+		<output file="PROJECT_FOLDER/ply_stress_xy.csv" complexfilter="" format="Textfile"/>
+	</query>
+	<query id="4" type="Report">
+		<hierarchy tag="f2">
+			<loadcase id="1" stepindex="0"/>
+			<loadcase id="2" stepindex="0"/>
+			<loadcase id="3" stepindex="0"/>
+		</hierarchy>
+		<result type="Element Strains (1D):CBAR/CBEAM Axial Strain" components="" system="" layers="" corner="" averaging="none"/>
+		<entity type="Elements" selectionmode="All" selectionlist=""/>
+		<sort by="By ID Increasing" type="By Load Case"/>
+		<output file="PROJECT_FOLDER/stringer_strain.csv" complexfilter="" format="Textfile"/>
+	</query>
+	<query id="5" type="Report">
+		<hierarchy tag="f2">
+			<loadcase id="1" stepindex="0"/>
+			<loadcase id="2" stepindex="0"/>
+			<loadcase id="3" stepindex="0"/>
+		</hierarchy>
+		<result type="Element Stresses (2D &amp; 3D)" components="XX XY YY " system="elemental" layers="Mid," corner="" averaging="none"/>
+		<entity type="Elements" selectionmode="All" selectionlist=""/>
+		<sort by="By ID Increasing" type="By Load Case"/>
+		<output file="PROJECT_FOLDER/panel_stress.csv" complexfilter="" format="Textfile"/>
+	</query>
+	<query id="6" type="Report">
+		<hierarchy tag="f2">
+			<loadcase id="1" stepindex="0"/>
+			<loadcase id="2" stepindex="0"/>
+			<loadcase id="3" stepindex="0"/>
+		</hierarchy>
+		<result type="Element Stresses (1D):CBAR/CBEAM Axial Stress" components="" system="" layers="" corner="" averaging="none"/>
+		<entity type="Elements" selectionmode="All" selectionlist=""/>
+		<sort by="By ID Increasing" type="By Load Case"/>
+		<output file="PROJECT_FOLDER/stringer_stress.csv" complexfilter="" format="Textfile"/>
+	</query>
+</root>
+
