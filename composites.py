@@ -165,7 +165,11 @@ class Panel:
             for n in range(1, n_max + 1):
                 sigma_crit_new = np.pi ** 2 / self.width ** 2 / self.laminate.t / ((m / alpha) ** 2 + beta * n ** 2) * (
                         ABD_avg[3, 3] * (m / alpha) ** 4 + 2 * (ABD_avg[3, 4] + ABD_avg[5, 5] * (m * n / alpha) ** 2) + ABD_avg[4, 4] * n ** 4)
-                if sigma_crit_new > 0 and abs(sigma_crit_new) < sigma_crit:
+                if 0 < sigma_crit_new < sigma_crit:
+                    if m == m_max:
+                        print('Warning: Reached m_max in Panel.sigma_x_crit_biaxial')
+                    if n == n_max:
+                        print('Warning: Reached n_max in Panel.sigma_x_crit_biaxial')
                     sigma_crit = sigma_crit_new
         return self.laminate.knockdown_factor * sigma_crit
 

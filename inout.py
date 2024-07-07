@@ -159,7 +159,7 @@ def fill_ASE_Project2024_task2_1_Template_xxxxxxx(decimals: int) -> None:
                                                               ['Element Stresses (1D):CBAR/CBEAM Axial Stress'].tolist())
             template.iat[61 + stringer, 1 + 5 * LC] = round(sigma_axial_comb_avg, 2)
             template.iat[61 + stringer, 2 + 5 * LC] = round(super_panel.stringer.sigma_crippling_web, 2)
-            template.iat[61 + stringer, 3 + 5 * LC] = round(super_panel.critical_buckling_stress / (UL_factor * sigma_axial_comb_avg), 2)
+            template.iat[61 + stringer, 3 + 5 * LC] = round(-super_panel.critical_buckling_stress / (UL_factor * sigma_axial_comb_avg), 2)
 
     # noinspection PyTypeChecker
     template.to_csv(config['files']['template_path'], sep=';', index=False, header=None)
