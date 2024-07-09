@@ -65,13 +65,14 @@ class Ply:
     @cached_property
     def Q_bar(self) -> np.ndarray:
         T_inv = np.linalg.inv(T(self.theta))
-        return T_inv @ self.Q @ np.linalg.matrix_transpose(T_inv)
+        return T_inv @ self.Q @ np.transpose(T_inv)
 
     def strength_failure(self, sigma_1: float, sigma_2: float, tau_21: float) -> PuckFailure:  # The stress state must be specified in the ply material coordinate system.
         m = self.mat
         RF_FF = (m.R1t if sigma_1 > 0 else m.R1c) / abs(sigma_1)
         R22A = m.R2c / 2 / (1 + m.p22c)
-        tau21c = m.R21 * np.sqrt(1 + 2 * m.p21c * R22A / m.R21)
+        # tau21c = m.R21 * np.sqrt(1 + 2 * m.p21c * R22A / m.R21)
+        tau21c = m.R21 * np.sqrt(1 + 2 * m.p22c)  # according to the Moodle post from 2024-07-09, 17:27
         if sigma_2 >= 0:
             mode = 'A'
             RF_IFF = 1 / (np.sqrt((tau_21 / m.R21) ** 2 + (1 - m.p21t * m.R2t / m.R21) ** 2 * (sigma_2 / m.R2t) ** 2) + m.p21t * sigma_2 / m.R21)
