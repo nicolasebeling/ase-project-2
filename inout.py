@@ -126,40 +126,40 @@ def fill_ASE_Project2024_task2_1_Template_xxxxxxx(decimals: int) -> None:
                 UL_factor * ply_stress_xx[(ply_stress_xx['Elements'] == 1) & (ply_stress_xx['Loadcase'] == LC + 1) & (ply_stress_xx['Layer'] == "Ply  " + str(ply + 1))]["Composite Stresses:Normal X Stress"].tolist()[0],
                 UL_factor * ply_stress_yy[(ply_stress_yy['Elements'] == 1) & (ply_stress_yy['Loadcase'] == LC + 1) & (ply_stress_yy['Layer'] == "Ply  " + str(ply + 1))]["Composite Stresses:Normal Y Stress"].tolist()[0],
                 UL_factor * ply_stress_xy[(ply_stress_xy['Elements'] == 1) & (ply_stress_xy['Loadcase'] == LC + 1) & (ply_stress_xy['Layer'] == "Ply  " + str(ply + 1))]["Composite Stresses:Shear XY Stress"].tolist()[0])
-            template.iat[31 + ply, 1 + 6 * LC] = round(strength_failure.RF_FF, 2)
-            template.iat[31 + ply, 2 + 6 * LC] = round(strength_failure.RF_IFF, 2)
+            template.iat[31 + ply, 1 + 6 * LC] = round(strength_failure.RF_FF, decimals)
+            template.iat[31 + ply, 2 + 6 * LC] = round(strength_failure.RF_IFF, decimals)
             template.iat[31 + ply, 3 + 6 * LC] = strength_failure.mode
-            template.iat[31 + ply, 4 + 6 * LC] = round(min(strength_failure.RF_FF, strength_failure.RF_IFF), 2)
+            template.iat[31 + ply, 4 + 6 * LC] = round(min(strength_failure.RF_FF, strength_failure.RF_IFF), decimals)
 
         # ...RF_FF, RF_IFF, matrix failure mode and RF_strength for element 40:
         strength_failures: list[PuckFailure] = super_panel.stringer.ply_strength_failures_from_1D_strain(
             UL_factor * stringer_strain[(stringer_strain['Elements'] == 40) & (stringer_strain['Loadcase'] == LC + 1)]['Element Strains (1D):CBAR/CBEAM Axial Strain'].tolist()[0])
         for ply in range(8):
-            template.iat[39 + ply, 1 + 6 * LC] = round(strength_failures[ply].RF_FF, 2)
-            template.iat[39 + ply, 2 + 6 * LC] = round(strength_failures[ply].RF_IFF, 2)
+            template.iat[39 + ply, 1 + 6 * LC] = round(strength_failures[ply].RF_FF, decimals)
+            template.iat[39 + ply, 2 + 6 * LC] = round(strength_failures[ply].RF_IFF, decimals)
             template.iat[39 + ply, 3 + 6 * LC] = strength_failures[ply].mode
-            template.iat[39 + ply, 4 + 6 * LC] = round(min(strength_failures[ply].RF_FF, strength_failures[ply].RF_IFF), 2)
+            template.iat[39 + ply, 4 + 6 * LC] = round(min(strength_failures[ply].RF_FF, strength_failures[ply].RF_IFF), decimals)
 
         # ...sig_xx_avg, sig_yy_avg, sig_xy_avg, sig_crit_shear, sig_crit_biaxial and RF_panel_buckling for all panels:
         for panel in range(5):
             sig_xx_avg = np.average(panel_stress[(panel_stress['Elements'].between(1 + panel * 6, 6 + panel * 6) & (panel_stress['Loadcase'] == LC + 1))]['XX'].tolist())
             sig_yy_avg = np.average(panel_stress[(panel_stress['Elements'].between(1 + panel * 6, 6 + panel * 6) & (panel_stress['Loadcase'] == LC + 1))]['YY'].tolist())
             sig_xy_avg = np.average(panel_stress[(panel_stress['Elements'].between(1 + panel * 6, 6 + panel * 6) & (panel_stress['Loadcase'] == LC + 1))]['XY'].tolist())
-            template.iat[52 + panel, 1 + 8 * LC] = round(sig_xx_avg, 2)
-            template.iat[52 + panel, 2 + 8 * LC] = round(sig_yy_avg, 2)
-            template.iat[52 + panel, 3 + 8 * LC] = round(sig_xy_avg, 2)
-            template.iat[52 + panel, 4 + 8 * LC] = round(super_panel.panel.tau_xy_crit_shear, 2)
-            template.iat[52 + panel, 5 + 8 * LC] = round(super_panel.panel.sigma_x_crit_biaxial(sigma_x=sig_xx_avg, sigma_y=sig_yy_avg, m_max=5, n_max=5), 2)
-            template.iat[52 + panel, 6 + 8 * LC] = round(super_panel.panel.RF_panel_buckling(sigma_x=UL_factor * sig_xx_avg, sigma_y=UL_factor * sig_yy_avg, tau_xy=UL_factor * sig_xy_avg, m_max=5, n_max=5), 2)
+            template.iat[52 + panel, 1 + 8 * LC] = round(sig_xx_avg, decimals)
+            template.iat[52 + panel, 2 + 8 * LC] = round(sig_yy_avg, decimals)
+            template.iat[52 + panel, 3 + 8 * LC] = round(sig_xy_avg, decimals)
+            template.iat[52 + panel, 4 + 8 * LC] = round(super_panel.panel.tau_xy_crit_shear, decimals)
+            template.iat[52 + panel, 5 + 8 * LC] = round(super_panel.panel.sigma_x_crit_biaxial(sigma_x=sig_xx_avg, sigma_y=sig_yy_avg, m_max=5, n_max=5), decimals)
+            template.iat[52 + panel, 6 + 8 * LC] = round(super_panel.panel.RF_panel_buckling(sigma_x=UL_factor * sig_xx_avg, sigma_y=UL_factor * sig_yy_avg, tau_xy=UL_factor * sig_xy_avg, m_max=5, n_max=5), decimals)
 
         # ...sig_axial_comb_avg, sig_crip, RF_column_buckling_combined for all stiffened panels:
         for stringer in range(4):
             sigma_axial_comb_avg = super_panel.average_stress(panel_stresses=panel_stress[(panel_stress['Elements'].between(4 + stringer * 6, 9 + stringer * 6) & (panel_stress['Loadcase'] == LC + 1))]['XX'].tolist(),
                                                               stringer_stresses=stringer_stress[(stringer_stress['Elements'].between(40 + stringer * 6, 42 + stringer * 6) & (stringer_stress['Loadcase'] == LC + 1))]
                                                               ['Element Stresses (1D):CBAR/CBEAM Axial Stress'].tolist())
-            template.iat[61 + stringer, 1 + 5 * LC] = round(sigma_axial_comb_avg, 2)
-            template.iat[61 + stringer, 2 + 5 * LC] = round(super_panel.stringer.sigma_crippling_web, 2)
-            template.iat[61 + stringer, 3 + 5 * LC] = round(-super_panel.critical_buckling_stress / (UL_factor * sigma_axial_comb_avg), 2)
+            template.iat[61 + stringer, 1 + 5 * LC] = round(sigma_axial_comb_avg, decimals)
+            template.iat[61 + stringer, 2 + 5 * LC] = round(super_panel.stringer.sigma_crippling_web, decimals)
+            template.iat[61 + stringer, 3 + 5 * LC] = round(-super_panel.critical_buckling_stress / (UL_factor * sigma_axial_comb_avg), decimals)
 
     # noinspection PyTypeChecker
     template.to_csv(config['files']['template_path'], sep=';', index=False, header=None)
