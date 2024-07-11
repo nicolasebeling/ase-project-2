@@ -160,30 +160,30 @@ class Panel:
             return sigma_crit
         alpha = self.length / self.width
         beta = sigma_y / sigma_x
-        ABD_avg = self.laminate.ABD
+        ABD_B = self.laminate.knockdown_factor * self.laminate.ABD
         for m in range(1, m_max + 1):
             for n in range(1, n_max + 1):
                 sigma_crit_new = np.pi ** 2 / self.width ** 2 / self.laminate.t / ((m / alpha) ** 2 + beta * n ** 2) * (
-                        ABD_avg[3, 3] * (m / alpha) ** 4 + 2 * (ABD_avg[3, 4] + ABD_avg[5, 5] * (m * n / alpha) ** 2) + ABD_avg[4, 4] * n ** 4)
+                        ABD_B[3, 3] * (m / alpha) ** 4 + 2 * (ABD_B[3, 4] + ABD_B[5, 5]) * (m * n / alpha) ** 2 + ABD_B[4, 4] * n ** 4)
                 if 0 < sigma_crit_new < sigma_crit:
                     if m == m_max:
                         print('Warning: Reached m_max in Panel.sigma_x_crit_biaxial')
                     if n == n_max:
                         print('Warning: Reached n_max in Panel.sigma_x_crit_biaxial')
                     sigma_crit = sigma_crit_new
-        return self.laminate.knockdown_factor * sigma_crit
+        return sigma_crit
 
     @cached_property
     def tau_xy_crit_shear(self) -> float:
-        ABD = self.laminate.ABD
+        ABD_B = self.laminate.knockdown_factor * self.laminate.ABD
         t = self.laminate.t
         b = self.width
-        delta = np.sqrt(ABD[3, 3] * ABD[4, 4]) / (ABD[3, 4] + 2 * ABD[5, 5])
-        if delta < 1:
-            tau_crit = 4 / t / b ** 2 * ((ABD[3, 3] * ABD[4, 4] ** 3) ** 0.25 * (8.12 + 5.05 / delta))
+        delta = np.sqrt(ABD_B[3, 3] * ABD_B[4, 4]) / (ABD_B[3, 4] + 2 * ABD_B[5, 5])
+        if delta >= 1:
+            tau_crit = 4 / t / b ** 2 * ((ABD_B[3, 3] * ABD_B[4, 4] ** 3) ** 0.25 * (8.12 + 5.05 / delta))
         else:
-            tau_crit = 4 / t / b ** 2 * (np.sqrt(ABD[4, 4] * (ABD[3, 4] + 2 * ABD[5, 5])) * (11.7 + 0.532 * delta + 0.938 * delta ** 2))
-        return self.laminate.knockdown_factor * tau_crit
+            tau_crit = 4 / t / b ** 2 * (np.sqrt(ABD_B[4, 4] * (ABD_B[3, 4] + 2 * ABD_B[5, 5])) * (11.7 + 0.532 * delta + 0.938 * delta ** 2))
+        return tau_crit
 
     def RF_panel_buckling(self, sigma_x: float, sigma_y: float, tau_xy: float, m_max: int, n_max: int) -> float:  # m, n: maximum numbers of half waves in local x, y direction used in the computation of sigma_xx_crit_biaxial
         return 1 / (abs(sigma_x) / self.sigma_x_crit_biaxial(sigma_x, sigma_y, m_max, n_max) + (abs(tau_xy) / self.tau_xy_crit_shear) ** 2)
@@ -242,7 +242,7 @@ class Stringer:
     @cached_property
     def sigma_crippling_web(self) -> float:
         # sigma_ult_c is not multiplied with the knockdown factor in this course even when it is used for stability analysis (2024-07-05).
-        return self.laminate.sigma_ult_c * 1.63 / (self.web_height / self.laminate.t) ** 0.7171
+        return self.laminate.sigma_ult_c * 1.63 / (self.web_height / self.laminate.t) ** 0.717
 
     # Strength analysis:
 
