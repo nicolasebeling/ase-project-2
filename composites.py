@@ -6,7 +6,6 @@ from typing import Final
 
 import numpy as np
 
-
 # ALl coordinates are given in the cosy centered at the upper edge of the stringer / lower edge of the panel / joint between stringer and panel.
 
 
@@ -187,7 +186,7 @@ class Panel:
         return self.laminate.knockdown_factor * tau_crit
 
     def RF_panel_buckling(self, sigma_x: float, sigma_y: float, tau_xy: float, m_max: int, n_max: int) -> float:  # m, n: maximum numbers of half waves in local x, y direction used in the computation of sigma_xx_crit_biaxial
-        return 1 / (self.sigma_x_crit_biaxial(sigma_x, sigma_y, m_max, n_max) / abs(sigma_x) + (self.tau_xy_crit_shear / abs(tau_xy)) ** 2)
+        return 1 / (abs(sigma_x) / self.sigma_x_crit_biaxial(sigma_x, sigma_y, m_max, n_max) + (abs(tau_xy) / self.tau_xy_crit_shear) ** 2)
 
     @cached_property
     def area(self) -> float:
@@ -279,7 +278,8 @@ class Stringer:
 
     @cached_property
     def z_EC(self):
-        return (self.z_EC_flange * self.flange_width + self.z_EC_web * self.web_height) / (self.flange_width + self.web_height)
+        return (self.z_EC_flange * self.laminate.E_hom_avg_x(free_lateral_deformation=False) * self.flange_width + self.z_EC_web * self.laminate.E_hom_avg_x(free_lateral_deformation=True) * self.web_height) / (
+                    self.flange_width * self.laminate.E_hom_avg_x(free_lateral_deformation=False) + self.web_height * self.laminate.E_hom_avg_x(free_lateral_deformation=True))
 
     @cached_property
     def I_yy_flange(self):
@@ -312,14 +312,16 @@ class StiffenedPanel:  # models a panel stiffened by a single stringer
     def z_EC(self) -> float:
         s = self.stringer
         p = self.panel
-        return ((s.z_EC_web * s.web_height + s.z_EC_flange * s.flange_width) * s.laminate.t + self.z_EC_panel * p.width * p.laminate.t) / (s.area + p.area)
+        return ((s.z_EC_web * s.laminate.E_hom_avg_x(free_lateral_deformation=True) * s.web_height + s.z_EC_flange * s.laminate.E_hom_avg_x(free_lateral_deformation=False) * s.flange_width) * s.laminate.t + self.z_EC_panel * p.laminate.E_hom_avg_x(
+            free_lateral_deformation=False) * p.width * p.laminate.t) / (
+                    s.area_web * s.laminate.E_hom_avg_x(free_lateral_deformation=True) + s.area_flange * s.laminate.E_hom_avg_x(free_lateral_deformation=False) + p.area * p.laminate.E_hom_avg_x(free_lateral_deformation=False))
 
     @cached_property
     def EI_hom_B_yy(self) -> float:  # used for Euler and Euler-Johnson buckling
         p = self.panel
         s = self.stringer
         return ((p.E_hom_B_x_b * p.I_yy + p.E_hom_B_x * p.area * (self.z_EC_panel - self.z_EC) ** 2 +
-                s.E_hom_B_x_b_flange * s.I_yy_flange + s.E_hom_B_x_flange * s.area_flange * (s.z_EC_flange - self.z_EC) ** 2) +
+                 s.E_hom_B_x_b_flange * s.I_yy_flange + s.E_hom_B_x_flange * s.area_flange * (s.z_EC_flange - self.z_EC) ** 2) +
                 s.E_hom_B_x_b_web * s.I_yy_web + s.E_hom_B_x_web * s.area_web * (s.z_EC_web - self.z_EC) ** 2)
 
     @cached_property
