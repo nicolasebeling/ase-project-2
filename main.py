@@ -9,4 +9,4 @@ if __name__ == '__main__':
     print("G = " + str(super_panel.stringer.G_hom_avg_xy))
 
     # Step 2: Fill the submission template:
-    io.fill_ASE_Project2024_task2_1_Template_xxxxxxx(decimals=4)
+    # io.fill_ASE_Project2024_task2_1_Template_xxxxxxx(decimals=9)

@@ -26,7 +26,6 @@ class PuckFailure:
     mode: str
 
 
-@dataclass
 class Material:
 
     def __init__(self, E1_avg: float, E2_avg: float, G12_avg: float, nu12: float, R1t: float, R1c: float, R2t: float,
@@ -91,7 +90,7 @@ class Laminate:
     sigma_ult_c: float
 
     @cached_property
-    def t(self):
+    def t(self) -> float:
         t: float = 0
         for ply in self.plies:
             t += ply.t
@@ -189,6 +188,10 @@ class Panel:
         return 1 / (abs(sigma_x) / self.sigma_x_crit_biaxial(sigma_x, sigma_y, m_max, n_max) + (abs(tau_xy) / self.tau_xy_crit_shear) ** 2)
 
     @cached_property
+    def z_EC(self) -> float:
+        return -self.laminate.t / 2
+
+    @cached_property
     def area(self) -> float:
         return self.laminate.t * self.width
 
@@ -222,19 +225,19 @@ class Stringer:
         return (self.laminate.G_hom_avg_xy(free_lateral_deformation=True) * self.web_height + self.laminate.G_hom_avg_xy(free_lateral_deformation=False) * self.flange_width) / (self.web_height + self.flange_width)
 
     @cached_property
-    def E_hom_B_x_flange(self):
+    def E_hom_B_x_flange(self) -> float:
         return self.laminate.E_hom_B_x(free_lateral_deformation=False)
 
     @cached_property
-    def E_hom_B_x_b_flange(self):
+    def E_hom_B_x_b_flange(self) -> float:
         return self.laminate.E_hom_B_x_b(free_lateral_deformation=False, parallel_to_bending_axis=True)
 
     @cached_property
-    def E_hom_B_x_web(self):
+    def E_hom_B_x_web(self) -> float:
         return self.laminate.E_hom_B_x(free_lateral_deformation=True)
 
     @cached_property
-    def E_hom_B_x_b_web(self):
+    def E_hom_B_x_b_web(self) -> float:
         return self.laminate.E_hom_B_x_b(free_lateral_deformation=True, parallel_to_bending_axis=False)
 
     # Crippling analysis:
@@ -269,24 +272,24 @@ class Stringer:
         return self.area_flange + self.area_web
 
     @cached_property
-    def z_EC_flange(self):
+    def z_EC_flange(self) -> float:
         return self.laminate.t / 2
 
     @cached_property
-    def z_EC_web(self):
+    def z_EC_web(self) -> float:
         return self.laminate.t + self.web_height / 2
 
     @cached_property
-    def z_EC(self):
+    def z_EC(self) -> float:
         return ((self.z_EC_flange * self.laminate.E_hom_avg_x(free_lateral_deformation=False) * self.flange_width + self.z_EC_web * self.laminate.E_hom_avg_x(free_lateral_deformation=True) * self.web_height) /
                 (self.flange_width * self.laminate.E_hom_avg_x(free_lateral_deformation=False) + self.web_height * self.laminate.E_hom_avg_x(free_lateral_deformation=True)))
 
     @cached_property
-    def I_yy_flange(self):
+    def I_yy_flange(self) -> float:
         return self.flange_width * self.laminate.t ** 3 / 12
 
     @cached_property
-    def I_yy_web(self):
+    def I_yy_web(self) -> float:
         return self.laminate.t * self.web_height ** 3 / 12
 
     @cached_property
@@ -305,22 +308,21 @@ class StiffenedPanel:  # models a panel stiffened by a single stringer
         return (self.panel.area * np.average(panel_stresses) + self.stringer.area * np.average(stringer_stresses)) / (self.panel.area + self.stringer.area)
 
     @cached_property
-    def z_EC_panel(self) -> float:
-        return -self.panel.laminate.t / 2
-
-    @cached_property
     def z_EC(self) -> float:
         s = self.stringer
         p = self.panel
-        return (((s.z_EC_web * s.laminate.E_hom_avg_x(free_lateral_deformation=True) * s.web_height + s.z_EC_flange * s.laminate.E_hom_avg_x(free_lateral_deformation=False) * s.flange_width) * s.laminate.t +
-                 self.z_EC_panel * p.laminate.E_hom_avg_x(free_lateral_deformation=False) * p.width * p.laminate.t) /
-                (s.area_web * s.laminate.E_hom_avg_x(free_lateral_deformation=True) + s.area_flange * s.laminate.E_hom_avg_x(free_lateral_deformation=False) + p.area * p.laminate.E_hom_avg_x(free_lateral_deformation=False)))
+        return (((s.z_EC_web * s.laminate.E_hom_avg_x(free_lateral_deformation=True) * s.web_height +
+                  s.z_EC_flange * s.laminate.E_hom_avg_x(free_lateral_deformation=False) * s.flange_width) * s.laminate.t +
+                 p.z_EC * p.laminate.E_hom_avg_x(free_lateral_deformation=False) * p.width * p.laminate.t) /
+                (s.area_web * s.laminate.E_hom_avg_x(free_lateral_deformation=True) +
+                 s.area_flange * s.laminate.E_hom_avg_x(free_lateral_deformation=False) +
+                 p.area * p.laminate.E_hom_avg_x(free_lateral_deformation=False)))
 
     @cached_property
     def EI_hom_B_yy(self) -> float:  # used for Euler and Euler-Johnson buckling
         p = self.panel
         s = self.stringer
-        return ((p.E_hom_B_x_b * p.I_yy + p.E_hom_B_x * p.area * (self.z_EC_panel - self.z_EC) ** 2 +
+        return ((p.E_hom_B_x_b * p.I_yy + p.E_hom_B_x * p.area * (p.z_EC - self.z_EC) ** 2 +
                  s.E_hom_B_x_b_flange * s.I_yy_flange + s.E_hom_B_x_flange * s.area_flange * (s.z_EC_flange - self.z_EC) ** 2) +
                 s.E_hom_B_x_b_web * s.I_yy_web + s.E_hom_B_x_web * s.area_web * (s.z_EC_web - self.z_EC) ** 2)
 
@@ -328,7 +330,9 @@ class StiffenedPanel:  # models a panel stiffened by a single stringer
     def I_yy(self) -> float:
         p = self.panel
         s = self.stringer
-        return p.I_yy + p.area * (self.z_EC_panel - self.z_EC) ** 2 + s.I_yy_web + s.area_web * (s.z_EC_web - self.z_EC) ** 2 + s.I_yy_flange + s.area_flange * (s.z_EC_flange - self.z_EC) ** 2
+        return (p.I_yy + p.area * (p.z_EC - self.z_EC) ** 2 +
+                s.I_yy_web + s.area_web * (s.z_EC_web - self.z_EC) ** 2 +
+                s.I_yy_flange + s.area_flange * (s.z_EC_flange - self.z_EC) ** 2)
 
     @cached_property
     def E_hom_B_yy(self) -> float:
